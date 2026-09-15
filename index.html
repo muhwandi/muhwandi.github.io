@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MPI - Berpikir Komputasional | SMP Muhammadiyah 4 Maduran</title>
+<style>
+  :root{
+    --biru:#2563eb;
+    --biru-tua:#1e3a8a;
+    --cyan:#06b6d4;
+    --ungu:#7c3aed;
+    --kuning:#f59e0b;
+    --hijau:#16a34a;
+    --merah:#ef4444;
+    --putih:#ffffff;
+    --teks:#1e293b;
+    --font-scale:1.0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    width:100%; height:100%;
+    font-family:-apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color:var(--teks);
+  }
+  body{
+    background:#f0f9ff url('bg-ruang-kelas.jpg') center/cover no-repeat fixed;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:rgba(240,249,255,0.82);
+    z-index:0;
+  }
+
+  /* ================= STAGE 16:9 ================= */
+  #stage-16-9{
+    position:relative;
+    z-index:1;
+    width:min(96vw, 177.7vh);
+    aspect-ratio:16/9;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+    border-radius:0;
+    overflow:hidden;
+    font-size:calc(15px * var(--font-scale, 1.0));
+  }
+
+  .page{
+    position:absolute; inset:0;
+    display:none;
+    flex-direction:column;
+    padding:clamp(10px, 1.8vh, 18px);
+    overflow:hidden;
+  }
+  .page.active{display:flex;}
+
+  /* ============ scrollbar kill ============ */
+  ::-webkit-scrollbar{display:none;}
+
+  button{font-family:inherit; cursor:pointer; border:none; outline:none; background:none;}
+  .no-select{-webkit-user-select:none; user-select:none;}
+
+  /* ================= HEADER NAV BAR (dipakai di halaman non-cover) ================= */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: clamp(4px,0.8vh,8px) clamp(8px,1.2vw,14px);
+    flex-shrink:0;
+  }
+  .topbar-left, .topbar-right{
+    display:flex; align-items:center; gap:clamp(6px,1vw,10px);
+  }
+  .nav-circle{
+    width:clamp(40px,5.2vh,48px); height:clamp(40px,5.2vh,48px);
+    border-radius:50%;
+    background:linear-gradient(145deg,var(--biru),var(--cyan));
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:clamp(18px,2.3vh,23px);
+    box-shadow:0 4px 10px rgba(37,99,235,0.4);
+    transition:transform .15s;
+    flex-shrink:0;
+  }
+  .nav-circle:active{transform:scale(0.9);}
+  .page-title-pill{
+    background:linear-gradient(90deg,var(--biru),var(--ungu));
+    color:#fff;
+    padding:clamp(6px,1vh,10px) clamp(18px,2.2vw,28px);
+    border-radius:999px;
+    font-size:clamp(16px,2.2vh,22px);
+    font-weight:800;
+    box-shadow:0 4px 12px rgba(37,99,235,0.3);
+    white-space:nowrap;
+  }
+  .sound-toggle{
+    display:flex; align-items:center; gap:6px;
+    background:#fff; border-radius:999px;
+    padding:4px 12px 4px 4px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.12);
+    font-size:clamp(11px,1.4vh,13px);
+    font-weight:700;
+    color:var(--biru-tua);
+  }
+
+  /* ================= HALAMAN 1: COVER ================= */
+  #page-cover{ justify-content:space-between; align-items:center; text-align:center; }
+  .cover-header{
+    display:flex; align-items:center; justify-content:center; gap:clamp(10px,1.6vw,18px);
+    width:100%;
+  }
+  .school-capsule{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,0.92);
+    padding:clamp(6px,1vh,10px) clamp(16px,2vw,24px);
+    border-radius:999px;
+    box-shadow:0 6px 18px rgba(30,58,138,0.18);
+  }
+  .school-capsule img{
+    height:clamp(50px,6.8vh,68px);
+    width:auto;
+  }
+  .school-capsule .school-text{ text-align:left; }
+  .school-capsule .school-text b{
+    display:block; font-size:clamp(13px,1.7vh,16px); color:var(--biru-tua); font-weight:800;
+  }
+  .school-capsule .school-text span{
+    font-size:clamp(10px,1.3vh,12px); color:#475569; font-weight:600;
+  }
+  .badge-row{ display:flex; gap:8px; }
+  .badge-pill{
+    background:linear-gradient(90deg,var(--kuning),#fbbf24);
+    color:#7c2d12; font-weight:800;
+    font-size:clamp(10px,1.3vh,12.5px);
+    padding:6px 14px; border-radius:999px;
+    box-shadow:0 4px 10px rgba(245,158,11,0.35);
+  }
+
+  .cover-middle{
+    display:flex; flex-direction:column; align-items:center; gap:clamp(8px,1.4vh,16px);
+    flex:1; justify-content:center;
+  }
+  .cover-title{
+    font-size:clamp(2.8rem, 6.8vw, 5.2rem);
+    font-weight:900;
+    line-height:1.02;
+    color:var(--biru-tua);
+    text-shadow:
+      -4px -4px 0 #fff, 4px -4px 0 #fff, -4px 4px 0 #fff, 4px 4px 0 #fff,
+      0 8px 18px rgba(30,58,138,0.35);
+    letter-spacing:1px;
+  }
+  .cover-subtitle{
+    font-size:clamp(1.4rem, 3.2vw, 2.6rem);
+    font-weight:800;
+    color:var(--ungu);
+    text-shadow:-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff,2px 2px 0 #fff;
+  }
+  .cover-desc{
+    font-size:clamp(13px,1.8vh,17px);
+    font-weight:600;
+    color:#334155;
+    max-width:70%;
+  }
+  .start-btn-wrap{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    margin-top:clamp(6px,1vh,10px);
+  }
+  .start-btn{
+    width:clamp(60px,8.5vh,80px); height:clamp(60px,8.5vh,80px);
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #34d399, var(--hijau));
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(26px,3.6vh,36px);
+    box-shadow:0 0 0 0 rgba(22,163,74,0.6);
+    animation:pulseGlow 1.8s infinite;
+  }
+  @keyframes pulseGlow{
+    0%{ box-shadow:0 0 0 0 rgba(22,163,74,0.55); transform:scale(1);}
+    70%{ box-shadow:0 0 0 22px rgba(22,163,74,0); transform:scale(1.04);}
+    100%{ box-shadow:0 0 0 0 rgba(22,163,74,0); transform:scale(1);}
+  }
+  .start-label{
+    font-size:clamp(24px,3.8vh,36px);
+    font-weight:900;
+    color:var(--biru-tua);
+  }
+
+  .cover-footer{
+    display:flex; align-items:center; justify-content:space-between; width:100%;
+    font-size:clamp(11px,1.4vh,13px);
+    font-weight:700;
+    color:#334155;
+  }
+  .cover-footer .teacher-line b{ color:var(--biru-tua); }
+  .cover-footer .motto{ font-style:italic; color:var(--ungu); }
+
+  /* ================= HALAMAN 2: MENU ================= */
+  #page-menu .menu-grid{
+    flex:1;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(2,1fr);
+    gap:clamp(10px,1.6vh,18px);
+    margin-top:clamp(6px,1vh,10px);
+  }
+  .menu-card{
+    background:rgba(255,255,255,0.94);
+    border-radius:20px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    gap:6px;
+    padding:clamp(6px,1vh,10px);
+    box-shadow:0 10px 22px rgba(30,58,138,0.15), 0 2px 0 rgba(255,255,255,0.6) inset;
+    transform:translateY(0);
+    transition:transform .15s, box-shadow .15s;
+    position:relative;
+  }
+  .menu-card:active{ transform:translateY(3px) scale(0.98); }
+  .icon-box{
+    width:clamp(66px,9vh,88px); height:clamp(66px,9vh,88px);
+    border-radius:22px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(34px,4.8vh,46px);
+    color:#fff;
+    box-shadow:0 6px 14px rgba(0,0,0,0.18);
+  }
+  .menu-card h3{
+    font-size:clamp(15px,2vh,20px);
+    font-weight:800;
+    color:var(--biru-tua);
+  }
+  .menu-card p{
+    font-size:clamp(10.5px,1.4vh,13px);
+    font-weight:600;
+    color:#475569;
+    line-height:1.3;
+  }
+  .ic-1{background:linear-gradient(145deg,#60a5fa,var(--biru));}
+  .ic-2{background:linear-gradient(145deg,#c084fc,var(--ungu));}
+  .ic-3{background:linear-gradient(145deg,#22d3ee,var(--cyan));}
+  .ic-4{background:linear-gradient(145deg,#fbbf24,var(--kuning));}
+  .ic-5{background:linear-gradient(145deg,#4ade80,var(--hijau));}
+  .ic-6{background:linear-gradient(145deg,#f87171,var(--merah));}
+
+  .accessibility-controls{
+    display:flex; align-items:center; gap:6px;
+    background:#fff; border-radius:999px; padding:4px 10px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.12);
+  }
+  .accessibility-controls button{
+    width:26px;height:26px;border-radius:50%;background:#e2e8f0;
+    font-weight:900; font-size:14px; color:var(--biru-tua);
+  }
+
+  /* ================= HALAMAN 3: TUJUAN ================= */
+  #page-tujuan .tp-wrap{
+    flex:1; display:flex; align-items:center; justify-content:center;
+  }
+  .tp-card{
+    background:rgba(255,255,255,0.95);
+    border-radius:26px;
+    width:min(900px,92%);
+    max-height:100%;
+    padding:clamp(16px,2.4vh,26px) clamp(24px,3vw,40px);
+    box-shadow:0 14px 30px rgba(30,58,138,0.18);
+    display:flex; flex-direction:column; gap:clamp(8px,1.2vh,14px);
+  }
+  .tp-card h2{
+    font-size:clamp(18px,2.6vh,26px); color:var(--biru-tua); font-weight:900;
+    text-align:center;
+  }
+  .tp-card .tp-sub{
+    text-align:center; font-size:clamp(12px,1.5vh,14px); font-weight:600; color:#64748b;
+  }
+  .tp-list{ display:flex; flex-direction:column; gap:clamp(6px,1vh,10px); }
+  .tp-item{
+    display:flex; align-items:flex-start; gap:12px;
+    background:linear-gradient(90deg,#eff6ff,#f5f3ff);
+    border-radius:14px;
+    padding:clamp(8px,1.2vh,12px) clamp(12px,1.6vw,16px);
+  }
+  .tp-item .tp-ico{
+    width:clamp(30px,4vh,36px); height:clamp(30px,4vh,36px);
+    border-radius:50%; background:var(--biru); color:#fff;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-size:clamp(14px,1.8vh,17px); font-weight:800;
+  }
+  .tp-item p{
+    font-size:clamp(13.5px,1.7vh,16px); font-weight:600; line-height:1.45; color:#1e293b;
+  }
+
+  /* ================= HALAMAN 4: MATERI ================= */
+  #page-materi .materi-grid{
+    flex:1;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    grid-template-rows:repeat(2,1fr);
+    gap:clamp(10px,1.4vh,16px);
+    margin-top:clamp(4px,0.8vh,8px);
+  }
+  .konsep-card{
+    background:rgba(255,255,255,0.94);
+    border-radius:18px;
+    display:flex; gap:clamp(8px,1.2vw,14px); align-items:center;
+    padding:clamp(10px,1.4vh,16px);
+    box-shadow:0 8px 18px rgba(30,58,138,0.14);
+  }
+  .konsep-card .k-visual{
+    flex:0 0 40%;
+    height:100%;
+    max-height:100%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .konsep-card .k-visual .icon-box{ width:clamp(58px,7.5vh,76px); height:clamp(58px,7.5vh,76px); font-size:clamp(28px,4vh,38px); }
+  .konsep-card .k-text{ flex:1; }
+  .konsep-card h3{ font-size:clamp(15px,2vh,20px); font-weight:800; color:var(--biru-tua); margin-bottom:4px;}
+  .konsep-card p{ font-size:clamp(13px,1.65vh,16px); font-weight:600; line-height:1.45; color:#334155; }
+
+  /* ================= HALAMAN 5: SIMULASI ================= */
+  #page-simulasi .sim-body{
+    flex:1; display:flex; gap:clamp(10px,1.4vw,16px); margin-top:clamp(4px,0.8vh,8px); min-height:0;
+  }
+  .sim-svg-wrap{
+    flex:1.3;
+    background:rgba(255,255,255,0.9);
+    border-radius:18px;
+    display:flex; align-items:center; justify-content:center;
+    padding:clamp(6px,1vh,10px);
+    box-shadow:0 8px 18px rgba(30,58,138,0.12);
+  }
+  .sim-svg-wrap svg{ height:clamp(260px,38vh,420px); width:100%; }
+  .sim-panel{
+    flex:1;
+    display:flex; flex-direction:column; gap:clamp(6px,1vh,10px);
+    background:rgba(255,255,255,0.9);
+    border-radius:18px;
+    padding:clamp(10px,1.4vh,14px);
+    box-shadow:0 8px 18px rgba(30,58,138,0.12);
+    min-height:0;
+  }
+  .sim-panel h4{ font-size:clamp(13px,1.7vh,15px); color:var(--biru-tua); font-weight:800; }
+  .sim-btn-row{ display:flex; gap:6px; flex-wrap:wrap; }
+  .sim-btn{
+    background:linear-gradient(145deg,var(--biru),var(--cyan));
+    color:#fff; font-weight:800; border-radius:12px;
+    padding:clamp(8px,1.2vh,10px) clamp(10px,1.4vw,14px);
+    font-size:clamp(13.5px,1.8vh,17px);
+    box-shadow:0 5px 12px rgba(37,99,235,0.3);
+  }
+  .sim-btn.secondary{ background:linear-gradient(145deg,#94a3b8,#64748b); }
+  .sim-btn.run{ background:linear-gradient(145deg,#4ade80,var(--hijau)); }
+  .sim-seq{
+    flex:1;
+    display:flex; flex-wrap:wrap; align-content:flex-start; gap:6px;
+    background:#f1f5f9; border-radius:12px; padding:8px;
+    min-height:0; overflow:hidden;
+  }
+  .sim-chip{
+    background:#fff; border:2px solid var(--biru);
+    color:var(--biru-tua); font-weight:800;
+    font-size:clamp(11px,1.4vh,13px);
+    padding:4px 10px; border-radius:999px;
+  }
+  .sim-status{
+    font-size:clamp(11.5px,1.5vh,13.5px); font-weight:700; color:#475569;
+    background:#f1f5f9; border-radius:10px; padding:6px 10px;
+  }
+
+  /* ================= HALAMAN 6: EVALUASI ================= */
+  #page-evaluasi .eval-body{ flex:1; min-height:0; display:flex; }
+  .eval-round{ flex:1; display:none; flex-direction:column; min-height:0; }
+  .eval-round.active{ display:flex; }
+  .soal-wrap{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(10px,1.6vh,16px);
+  }
+  .soal-box{
+    background:rgba(255,255,255,0.95);
+    border-radius:20px;
+    width:min(820px,94%);
+    padding:clamp(14px,2vh,20px) clamp(20px,2.6vw,30px);
+    box-shadow:0 12px 26px rgba(30,58,138,0.16);
+    text-align:center;
+  }
+  .soal-box .soal-no{ font-size:clamp(11px,1.4vh,13px); font-weight:800; color:var(--ungu); margin-bottom:4px;}
+  .soal-box .soal-teks{ font-size:clamp(15px,2vh,19px); font-weight:800; color:var(--biru-tua); margin-bottom:clamp(10px,1.6vh,16px);}
+  .opsi-grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(8px,1.2vh,12px); }
+  .opsi-btn{
+    background:#eff6ff; border:2px solid #bfdbfe;
+    border-radius:14px; padding:clamp(10px,1.4vh,12px) clamp(10px,1.6vw,16px);
+    font-size:clamp(13.5px,1.8vh,17px); font-weight:700; color:#1e3a8a;
+    text-align:left;
+  }
+  .opsi-btn.benar{ background:#dcfce7; border-color:var(--hijau); color:#166534; }
+  .opsi-btn.salah{ background:#fee2e2; border-color:var(--merah); color:#991b1b; }
+  .tf-row{ display:flex; gap:clamp(14px,2vw,24px); justify-content:center; }
+  .tf-btn{
+    width:clamp(90px,12vw,140px); padding:clamp(10px,1.6vh,14px) 0;
+    border-radius:14px; font-weight:900; font-size:clamp(14px,1.9vh,18px);
+  }
+  .tf-btn.b{ background:#dcfce7; color:#166534; border:2px solid var(--hijau); }
+  .tf-btn.s{ background:#fee2e2; color:#991b1b; border:2px solid var(--merah); }
+
+  .match-wrap{ flex:1; display:flex; gap:clamp(20px,4vw,60px); align-items:center; justify-content:center; position:relative; }
+  .match-col{ display:flex; flex-direction:column; gap:clamp(10px,1.6vh,16px); }
+  .match-item{
+    background:#fff; border:2px solid #bfdbfe; border-radius:14px;
+    padding:clamp(10px,1.4vh,13px) clamp(14px,1.8vw,18px);
+    font-size:clamp(13px,1.7vh,15.5px); font-weight:700; color:#1e3a8a;
+    width:clamp(160px,22vw,230px); text-align:center;
+  }
+  .match-item.selected{ border-color:var(--ungu); background:#f5f3ff; }
+  .match-item.done{ border-color:var(--hijau); background:#dcfce7; color:#166534; }
+  #match-svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+
+  .eval-nav-row{ display:flex; justify-content:center; gap:14px; margin-top:6px; }
+  .eval-progress{ display:flex; justify-content:center; gap:6px; margin-top:6px; }
+  .dot{ width:8px;height:8px;border-radius:50%; background:#cbd5e1; }
+  .dot.on{ background:var(--biru); }
+
+  #round-d{ align-items:center; justify-content:center; }
+  .rekap-box{
+    background:rgba(255,255,255,0.95); border-radius:24px;
+    padding:clamp(16px,2.4vh,26px) clamp(26px,3.4vw,44px);
+    text-align:center; box-shadow:0 14px 30px rgba(30,58,138,0.18);
+    display:flex; flex-direction:column; align-items:center; gap:clamp(6px,1vh,10px);
+  }
+  .trophy{ font-size:clamp(44px,6vh,60px); filter:drop-shadow(0 6px 8px rgba(245,158,11,0.45)); animation:bounceT 1.4s infinite; }
+  @keyframes bounceT{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+  .skor-total{ font-size:clamp(2.2rem,5vw,3.4rem); font-weight:900; color:var(--biru-tua); }
+  .skor-rincian{ display:flex; gap:clamp(10px,2vw,20px); font-size:clamp(11.5px,1.5vh,13.5px); font-weight:700; color:#475569; }
+  .reset-btn{
+    margin-top:6px; background:linear-gradient(145deg,var(--ungu),#a855f7); color:#fff; font-weight:800;
+    padding:10px 26px; border-radius:999px; font-size:clamp(13px,1.7vh,15px);
+    box-shadow:0 6px 14px rgba(124,58,237,0.35);
+  }
+
+  /* ================= HALAMAN 7: PROFIL GURU ================= */
+  #page-profil .profil-wrap{ flex:1; display:flex; align-items:center; justify-content:center; }
+  .profil-card{
+    background:rgba(255,255,255,0.95); border-radius:26px;
+    padding:clamp(16px,2.4vh,26px) clamp(30px,4vw,50px);
+    display:flex; align-items:center; gap:clamp(20px,3vw,40px);
+    box-shadow:0 14px 30px rgba(30,58,138,0.18);
+    max-width:92%;
+  }
+  .profil-foto{
+    width:clamp(130px,18vh,175px); height:clamp(130px,18vh,175px);
+    border-radius:50%; flex-shrink:0;
+    background:linear-gradient(145deg,var(--biru),var(--ungu));
+    padding:5px;
+    box-shadow:0 10px 22px rgba(30,58,138,0.35);
+  }
+  .profil-foto img{ width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background:#e2e8f0; }
+  .profil-text h2{ font-size:clamp(20px,2.8vh,24px); font-weight:900; color:var(--biru-tua); }
+  .profil-text .jabatan{ font-size:clamp(13px,1.7vh,15px); font-weight:700; color:var(--ungu); margin-top:2px; }
+  .profil-text .sekolah{ font-size:clamp(13px,1.6vh,15px); font-weight:600; color:#475569; margin-top:4px; }
+  .profil-text .quote{
+    margin-top:clamp(10px,1.6vh,14px);
+    font-size:clamp(12.5px,1.6vh,14.5px); font-style:italic; font-weight:600; color:#334155;
+    border-left:4px solid var(--kuning); padding-left:10px; max-width:420px;
+  }
+
+  /* ================= WAWASAN POPUP ================= */
+  .overlay{
+    position:absolute; inset:0; z-index:20;
+    background:rgba(15,23,42,0.55);
+    display:none; align-items:center; justify-content:center;
+  }
+  .overlay.active{ display:flex; }
+  .fact-box{
+    background:#fff; border-radius:22px; padding:clamp(18px,2.6vh,28px) clamp(22px,3vw,34px);
+    width:min(560px,88%); text-align:center; position:relative;
+    box-shadow:0 20px 40px rgba(0,0,0,0.3);
+  }
+  .fact-box .icon-box{ margin:0 auto 10px; }
+  .fact-box h3{ font-size:clamp(16px,2.2vh,20px); font-weight:900; color:var(--biru-tua); margin-bottom:8px;}
+  .fact-box p{ font-size:clamp(13px,1.7vh,15.5px); font-weight:600; color:#334155; line-height:1.5; }
+  .fact-close{
+    position:absolute; top:10px; right:10px;
+    width:30px;height:30px;border-radius:50%; background:#f1f5f9; color:#475569; font-weight:900;
+  }
+  .fact-next{ margin-top:14px; background:var(--biru); color:#fff; font-weight:800; padding:8px 20px; border-radius:999px; font-size:13px;}
+
+  img[data-fallback]{ }
+</style>
+</head>
+<body>
+
+<div id="stage-16-9">
+
+  <!-- ===================== HALAMAN 1: COVER ===================== -->
+  <section class="page active" id="page-cover">
+    <div class="cover-header">
+      <div class="school-capsule">
+        <img src="Desain_tanpa_judul_20260915_115922_0000.png" alt="Logo Sekolah" onerror="this.style.display='none'">
+        <div class="school-text">
+          <b>SMP Muhammadiyah 4 Maduran</b>
+          <span>Media Pembelajaran Interaktif</span>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge-pill">Kurikulum Merdeka</span>
+        <span class="badge-pill">Fase D</span>
+      </div>
+    </div>
+
+    <div class="cover-middle">
+      <div class="cover-title">Berpikir<br>Komputasional</div>
+      <div class="cover-subtitle">TIK — Fase D Kelas VII SMP</div>
+      <div class="cover-desc">Memahami cara berpikir komputasional dan merealisasikannya dalam kehidupan nyata</div>
+      <div class="start-btn-wrap">
+        <button class="start-btn no-select" onclick="playClick(); goPage('menu')">▶</button>
+        <div class="start-label">MULAI</div>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <div class="teacher-line">Disusun oleh: <b>Muhammad Suwandi, S.Pd.</b> — SMP Muhammadiyah 4 Maduran</div>
+      <div class="motto">"Berpikir runtut, bertindak cermat, menyelesaikan masalah dengan tepat"</div>
+    </div>
+  </section>
+
+  <!-- ===================== HALAMAN 2: MENU ===================== -->
+  <section class="page" id="page-menu">
+    <div class="topbar">
+      <button class="nav-circle no-select" onclick="playClick(); goPage('cover')">🏠</button>
+      <div class="page-title-pill">Menu Utama</div>
+      <div class="topbar-right">
+        <div class="accessibility-controls">
+          <button onclick="changeFont(-0.05)">A-</button>
+          <button onclick="changeFont(0.05)">A+</button>
+        </div>
+        <div class="sound-toggle">
+          🔊 <span id="sound-label">ON</span>
+          <label style="position:relative; display:inline-block; width:30px; height:16px;">
+            <input type="checkbox" id="sound-check" checked onchange="toggleSound()" style="opacity:0;width:0;height:0;">
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="menu-grid">
+      <button class="menu-card no-select" onclick="playClick(); goPage('tujuan')">
+        <div class="icon-box ic-1">🎯</div>
+        <h3>Tujuan Pembelajaran</h3>
+        <p>Capaian & indikator kompetensi siswa</p>
+      </button>
+      <button class="menu-card no-select" onclick="playClick(); goPage('materi')">
+        <div class="icon-box ic-2">📖</div>
+        <h3>Materi Pembelajaran</h3>
+        <p>Eksplorasi konsep kunci berpikir komputasional</p>
+      </button>
+      <button class="menu-card no-select" onclick="playClick(); goPage('simulasi')">
+        <div class="icon-box ic-3">🕹️</div>
+        <h3>Simulasi Interaktif</h3>
+        <p>Robot navigasi — susun algoritma langkah</p>
+      </button>
+      <button class="menu-card no-select" onclick="playClick(); goPage('evaluasi')">
+        <div class="icon-box ic-4">📝</div>
+        <h3>Evaluasi Multi-Format</h3>
+        <p>Uji pemahaman — total 100 poin</p>
+      </button>
+      <button class="menu-card no-select" onclick="playClick(); goPage('profil')">
+        <div class="icon-box ic-5">👨‍🏫</div>
+        <h3>Profil Guru</h3>
+        <p>Informasi fasilitator pendidik</p>
+      </button>
+      <button class="menu-card no-select" onclick="playClick(); openFact()">
+        <div class="icon-box ic-6">💡</div>
+        <h3>Wawasan & Fakta</h3>
+        <p>Fakta menarik seputar berpikir komputasional</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================== HALAMAN 3: TUJUAN ===================== -->
+  <section class="page" id="page-tujuan">
+    <div class="topbar">
+      <button class="nav-circle no-select" onclick="playClick(); goPage('menu')">↩️</button>
+      <div class="page-title-pill">Tujuan Pembelajaran</div>
+      <button class="nav-circle no-select" onclick="playClick(); goPage('cover')">🏠</button>
+    </div>
+    <div class="tp-wrap">
+      <div class="tp-card">
+        <h2>Capaian & Indikator Kompetensi</h2>
+        <div class="tp-sub">Memahami cara berpikir komputasional dan merealisasikannya dalam kehidupan nyata</div>
+        <div class="tp-list">
+          <div class="tp-item"><div class="tp-ico">1</div><p>Menjelaskan pengertian dan empat unsur utama berpikir komputasional: dekomposisi, pengenalan pola, abstraksi, dan algoritma.</p></div>
+          <div class="tp-item"><div class="tp-ico">2</div><p>Menerapkan dekomposisi untuk memecah suatu masalah nyata menjadi bagian-bagian yang lebih sederhana.</p></div>
+          <div class="tp-item"><div class="tp-ico">3</div><p>Menyusun algoritma berupa langkah-langkah logis dan berurutan untuk menyelesaikan suatu persoalan sehari-hari.</p></div>
+          <div class="tp-item"><div class="tp-ico">4</div><p>Mengevaluasi hasil penyelesaian masalah menggunakan konsep berpikir komputasional secara mandiri maupun kelompok.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HALAMAN 4: MATERI ===================== -->
+  <section class="page" id="page-materi">
+    <div class="topbar">
+      <button class="nav-circle no-select" onclick="playClick(); goPage('menu')">↩️</button>
+      <div class="page-title-pill">Materi Pembelajaran</div>
+      <button class="nav-circle no-select" onclick="playClick(); goPage('cover')">🏠</button>
+    </div>
+    <div class="materi-grid">
+      <div class="konsep-card">
+        <div class="k-visual"><div class="icon-box ic-1">🧩</div></div>
+        <div class="k-text">
+          <h3>Dekomposisi</h3>
+          <p>Memecah masalah besar dan rumit menjadi bagian-bagian kecil yang lebih sederhana, sehingga setiap bagian dapat diselesaikan satu per satu.</p>
+        </div>
+      </div>
+      <div class="konsep-card">
+        <div class="k-visual"><div class="icon-box ic-2">🔍</div></div>
+        <div class="k-text">
+          <h3>Pengenalan Pola</h3>
+          <p>Menemukan kesamaan, pola, atau tren dari beberapa masalah agar penyelesaiannya bisa digunakan kembali untuk masalah serupa.</p>
+        </div>
+      </div>
+      <div class="konsep-card">
+        <div class="k-visual"><div class="icon-box ic-3">🎭</div></div>
+        <div class="k-text">
+          <h3>Abstraksi</h3>
+          <p>Berfokus pada informasi yang penting saja dan mengabaikan detail yang tidak diperlukan agar masalah lebih mudah dipahami.</p>
+        </div>
+      </div>
+      <div class="konsep-card">
+        <div class="k-visual"><div class="icon-box ic-4">🔀</div></div>
+        <div class="k-text">
+          <h3>Algoritma</h3>
+          <p>Menyusun langkah-langkah logis dan berurutan sebagai rencana penyelesaian masalah, sebelum dituangkan ke dalam tindakan nyata.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HALAMAN 5: SIMULASI ===================== -->
+  <section class="page" id="page-simulasi">
+    <div class="topbar">
+      <button class="nav-circle no-select" onclick="playClick(); goPage('menu')">↩️</button>
+      <div class="page-title-pill">Simulasi: Robot Navigasi</div>
+      <button class="nav-circle no-select" onclick="playClick(); goPage('cover')">🏠</button>
+    </div>
+    <div class="sim-body">
+      <div class="sim-svg-wrap">
+        <svg id="maze-svg" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="sim-panel">
+        <h4>Susun Algoritma untuk Robot</h4>
+        <div class="sim-btn-row">
+          <button class="sim-btn no-select" onclick="addStep('maju')">⬆️ Maju</button>
+          <button class="sim-btn no-select" onclick="addStep('kiri')">↩️ Kiri</button>
+          <button class="sim-btn no-select" onclick="addStep('kanan')">↪️ Kanan</button>
+        </div>
+        <div class="sim-seq" id="sim-seq"></div>
+        <div class="sim-status" id="sim-status">Susun langkah lalu tekan JALANKAN. Target: bendera 🏁</div>
+        <div class="sim-btn-row">
+          <button class="sim-btn run no-select" onclick="runSim()">▶ Jalankan</button>
+          <button class="sim-btn secondary no-select" onclick="resetSim()">↺ Reset</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HALAMAN 6: EVALUASI ===================== -->
+  <section class="page" id="page-evaluasi">
+    <div class="topbar">
+      <button class="nav-circle no-select" onclick="playClick(); goPage('menu')">↩️</button>
+      <div class="page-title-pill" id="eval-title-pill">Evaluasi — Babak A</div>
+      <button class="nav-circle no-select" onclick="playClick(); goPage('cover')">🏠</button>
+    </div>
+
+    <div class="eval-body">
+      <!-- BABAK A: PILIHAN GANDA -->
+      <div class="eval-round active" id="round-a">
+        <div class="soal-wrap">
+          <div class="soal-box">
+            <div class="soal-no" id="pg-no">Soal 1 dari 3</div>
+            <div class="soal-teks" id="pg-teks"></div>
+            <div class="opsi-grid" id="pg-opsi"></div>
+          </div>
+          <div class="eval-progress" id="pg-progress"></div>
+        </div>
+      </div>
+
+      <!-- BABAK B: MENJODOHKAN -->
+      <div class="eval-round" id="round-b">
+        <div class="match-wrap">
+          <svg id="match-svg"></svg>
+          <div class="match-col" id="match-left"></div>
+          <div class="match-col" id="match-right"></div>
+        </div>
+      </div>
+
+      <!-- BABAK C: BENAR/SALAH -->
+      <div class="eval-round" id="round-c">
+        <div class="soal-wrap">
+          <div class="soal-box">
+            <div class="soal-no" id="tf-no">Pernyataan 1 dari 3</div>
+            <div class="soal-teks" id="tf-teks"></div>
+            <div class="tf-row">
+              <button class="tf-btn b no-select" onclick="answerTF(true)">✓ BENAR</button>
+              <button class="tf-btn s no-select" onclick="answerTF(false)">✗ SALAH</button>
+            </div>
+          </div>
+          <div class="eval-progress" id="tf-progress"></div>
+        </div>
+      </div>
+
+      <!-- BABAK D: REKAP -->
+      <div class="eval-round" id="round-d">
+        <div class="rekap-box">
+          <div class="trophy">🏆</div>
+          <div style="font-size:clamp(13px,1.7vh,15px); font-weight:800; color:#475569;">Nilai Evaluasi Kamu</div>
+          <div class="skor-total" id="skor-total">0</div>
+          <div class="skor-rincian">
+            <span>Babak A: <b id="skor-a">0</b>/30</span>
+            <span>Babak B: <b id="skor-b">0</b>/40</span>
+            <span>Babak C: <b id="skor-c">0</b>/30</span>
+          </div>
+          <button class="reset-btn no-select" onclick="resetEvaluasi()">↺ Ulangi Evaluasi</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HALAMAN 7: PROFIL GURU ===================== -->
+  <section class="page" id="page-profil">
+    <div class="topbar">
+      <button class="nav-circle no-select" onclick="playClick(); goPage('menu')">↩️</button>
+      <div class="page-title-pill">Profil Guru Pengembang</div>
+      <button class="nav-circle no-select" onclick="playClick(); goPage('cover')">🏠</button>
+    </div>
+    <div class="profil-wrap">
+      <div class="profil-card">
+        <div class="profil-foto">
+          <img src="Desain_Tanpa_Judul_-_1_20260915_113636_0000.jpg" alt="Foto Guru" onerror="this.style.display='none'">
+        </div>
+        <div class="profil-text">
+          <h2>Muhammad Suwandi, S.Pd.</h2>
+          <div class="jabatan">Guru Mata Pelajaran TIK</div>
+          <div class="sekolah">SMP Muhammadiyah 4 Maduran</div>
+          <div class="quote">"Pendidikan terbaik adalah yang mengajarkan siswa untuk berpikir runtut sebelum bertindak, dan bijak dalam menyelesaikan setiap masalah."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== POPUP WAWASAN ===================== -->
+  <div class="overlay" id="fact-overlay">
+    <div class="fact-box">
+      <button class="fact-close no-select" onclick="closeFact()">✕</button>
+      <div class="icon-box ic-6" style="width:64px;height:64px;font-size:30px;">💡</div>
+      <h3 id="fact-title">Tahukah Kamu?</h3>
+      <p id="fact-text"></p>
+      <button class="fact-next no-select" onclick="nextFact()">Fakta Lain ➜</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   AUDIO — Web Audio API Synth (100% offline, tanpa file MP3)
+   ============================================================ */
+let audioCtx = null;
+let soundOn = true;
+function ensureAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+  }
+}
+function tone(freq, duration, type, gainVal, delay){
+  if(!soundOn || !audioCtx) return;
+  const t0 = audioCtx.currentTime + (delay||0);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(gainVal||0.15, t0+0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0+duration);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+duration+0.02);
+}
+function playClick(){
+  ensureAudio();
+  if(!soundOn || !audioCtx) return;
+  const t0 = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type='sine';
+  osc.frequency.setValueAtTime(450,t0);
+  osc.frequency.exponentialRampToValueAtTime(880,t0+0.1);
+  gain.gain.setValueAtTime(0.14,t0);
+  gain.gain.exponentialRampToValueAtTime(0.001,t0+0.12);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+0.13);
+}
+function playBenar(){
+  ensureAudio();
+  tone(523.25,0.22,'triangle',0.18,0);
+  tone(659.25,0.22,'triangle',0.18,0.08);
+  tone(783.99,0.3,'triangle',0.18,0.16);
+}
+function playSalah(){
+  ensureAudio();
+  tone(220,0.35,'sawtooth',0.15,0);
+  tone(180,0.4,'sawtooth',0.15,0.08);
+}
+function playMove(){
+  ensureAudio();
+  tone(600,0.08,'square',0.1,0);
+}
+function playWin(){
+  ensureAudio();
+  tone(523.25,0.15,'triangle',0.18,0);
+  tone(659.25,0.15,'triangle',0.18,0.12);
+  tone(783.99,0.15,'triangle',0.18,0.24);
+  tone(1046.5,0.35,'triangle',0.2,0.36);
+}
+function toggleSound(){
+  soundOn = document.getElementById('sound-check').checked;
+  document.getElementById('sound-label').textContent = soundOn ? 'ON' : 'OFF';
+  if(soundOn) ensureAudio();
+}
+
+/* ============================================================
+   NAVIGASI HALAMAN
+   ============================================================ */
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='simulasi') initMaze();
+  if(name==='evaluasi') initEvaluasi();
+}
+
+/* ============================================================
+   AKSESIBILITAS FONT SCALE
+   ============================================================ */
+let fontScale = 1.0;
+function changeFont(delta){
+  fontScale = Math.min(1.25, Math.max(0.85, fontScale+delta));
+  document.getElementById('stage-16-9').style.setProperty('--font-scale', fontScale);
+  playClick();
+}
+
+/* ============================================================
+   WAWASAN & FAKTA POPUP
+   ============================================================ */
+const facts = [
+  "Istilah \"Computational Thinking\" atau berpikir komputasional dipopulerkan oleh Jeannette Wing pada tahun 2006 sebagai keterampilan dasar abad ke-21.",
+  "Berpikir komputasional tidak hanya untuk programmer — keterampilan ini juga dipakai koki saat menyusun resep, atlet saat menyusun strategi, dan bahkan saat kita merencanakan perjalanan.",
+  "Algoritma resep masakan, seperti langkah membuat mi instan, adalah contoh sederhana algoritma dalam kehidupan sehari-hari.",
+  "Dekomposisi digunakan insinyur perangkat lunak untuk memecah aplikasi besar seperti media sosial menjadi ribuan modul kecil yang lebih mudah dikelola.",
+  "Pengenalan pola membantu mesin pencari dan asisten virtual mengenali kebiasaan penggunanya untuk memberikan hasil yang lebih relevan."
+];
+let factIdx = 0;
+function openFact(){
+  factIdx = 0;
+  document.getElementById('fact-text').textContent = facts[factIdx];
+  document.getElementById('fact-overlay').classList.add('active');
+}
+function nextFact(){
+  playClick();
+  factIdx = (factIdx+1) % facts.length;
+  document.getElementById('fact-text').textContent = facts[factIdx];
+}
+function closeFact(){
+  playClick();
+  document.getElementById('fact-overlay').classList.remove('active');
+}
+
+/* ============================================================
+   HALAMAN 5 — SIMULASI ROBOT NAVIGASI (SVG)
+   ============================================================ */
+const GRID_COLS = 5, GRID_ROWS = 3, CELL = 80, OX = 50, OY = 30;
+let robotState = { x:0, y:1, dir:0 }; // dir: 0=kanan,1=bawah,2=kiri,3=atas
+let mazeInit = false;
+let obstacles = [{x:2,y:1}];
+let target = {x:4,y:1};
+let sequence = [];
+
+function cellCenter(cx,cy){ return [OX+cx*CELL+CELL/2, OY+cy*CELL+CELL/2]; }
+
+function initMaze(){
+  if(mazeInit) return;
+  mazeInit = true;
+  drawMaze();
+}
+function drawMaze(){
+  const svg = document.getElementById('maze-svg');
+  let html = '';
+  // grid cells
+  for(let cy=0; cy<GRID_ROWS; cy++){
+    for(let cx=0; cx<GRID_COLS; cx++){
+      const x = OX+cx*CELL, y = OY+cy*CELL;
+      html += `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2" rx="8"/>`;
+    }
+  }
+  // obstacles
+  obstacles.forEach(o=>{
+    const x = OX+o.x*CELL, y = OY+o.y*CELL;
+    html += `<rect x="${x+8}" y="${y+8}" width="${CELL-16}" height="${CELL-16}" fill="#fecaca" stroke="#ef4444" stroke-width="3" rx="8"/>`;
+    html += `<text x="${x+CELL/2}" y="${y+CELL/2+8}" font-size="26" text-anchor="middle">🧱</text>`;
+  });
+  // target
+  const [tx,ty] = cellCenter(target.x,target.y);
+  html += `<text x="${tx}" y="${ty+10}" font-size="30" text-anchor="middle">🏁</text>`;
+  // labels pill
+  html += `<rect x="${OX}" y="${OY-24}" width="70" height="20" rx="6" fill="white" stroke="#2563eb" stroke-width="1.5"/>`;
+  html += `<text x="${OX+35}" y="${OY-10}" font-size="13" font-weight="800" text-anchor="middle" fill="#1e3a8a">MULAI</text>`;
+  const [tgx,] = cellCenter(target.x,target.y);
+  html += `<rect x="${tgx-35}" y="${OY-24}" width="70" height="20" rx="6" fill="white" stroke="#16a34a" stroke-width="1.5"/>`;
+  html += `<text x="${tgx}" y="${OY-10}" font-size="13" font-weight="800" text-anchor="middle" fill="#166534">TARGET</text>`;
+
+  svg.innerHTML = html;
+  drawRobot();
+}
+function drawRobot(){
+  const svg = document.getElementById('maze-svg');
+  let old = document.getElementById('robot-g');
+  if(old) old.remove();
+  const [cx,cy] = cellCenter(robotState.x, robotState.y);
+  const rot = robotState.dir*90;
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('id','robot-g');
+  g.setAttribute('transform', `translate(${cx},${cy}) rotate(${rot})`);
+  g.innerHTML = `
+    <circle r="22" fill="url(#robotGrad)" stroke="#1e3a8a" stroke-width="3"/>
+    <polygon points="14,0 -4,-9 -4,9" fill="#fff"/>
+  `;
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML = `<linearGradient id="robotGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>`;
+  svg.appendChild(defs);
+  svg.appendChild(g);
+}
+function addStep(step){
+  playClick();
+  sequence.push(step);
+  renderSeq();
+}
+function renderSeq(){
+  const wrap = document.getElementById('sim-seq');
+  const icons = {maju:'⬆️ Maju', kiri:'↩️ Kiri', kanan:'↪️ Kanan'};
+  wrap.innerHTML = sequence.map(s=>`<span class="sim-chip">${icons[s]}</span>`).join('');
+}
+function resetSim(){
+  playClick();
+  sequence = [];
+  robotState = {x:0,y:1,dir:0};
+  renderSeq();
+  drawRobot();
+  document.getElementById('sim-status').textContent = 'Susun langkah lalu tekan JALANKAN. Target: bendera 🏁';
+}
+async function runSim(){
+  playClick();
+  robotState = {x:0,y:1,dir:0};
+  drawRobot();
+  document.getElementById('sim-status').textContent = 'Menjalankan algoritma...';
+  await sleep(300);
+  for(let i=0;i<sequence.length;i++){
+    const step = sequence[i];
+    if(step==='kiri'){ robotState.dir = (robotState.dir+3)%4; }
+    else if(step==='kanan'){ robotState.dir = (robotState.dir+1)%4; }
+    else if(step==='maju'){
+      const deltas = [[1,0],[0,1],[-1,0],[0,-1]];
+      const [dx,dy] = deltas[robotState.dir];
+      const nx = robotState.x+dx, ny = robotState.y+dy;
+      if(nx<0||nx>=GRID_COLS||ny<0||ny>=GRID_ROWS || obstacles.some(o=>o.x===nx&&o.y===ny)){
+        playSalah();
+        document.getElementById('sim-status').textContent = '🚧 Robot terhalang! Coba susun ulang algoritma.';
+        return;
+      }
+      robotState.x = nx; robotState.y = ny;
+      playMove();
+    }
+    drawRobot();
+    await sleep(450);
+  }
+  if(robotState.x===target.x && robotState.y===target.y){
+    playWin();
+    document.getElementById('sim-status').textContent = '🎉 Berhasil! Robot sampai di target dengan algoritma yang tepat.';
+  } else {
+    playSalah();
+    document.getElementById('sim-status').textContent = 'Belum sampai target. Coba tambahkan atau ubah langkah algoritma.';
+  }
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* ============================================================
+   HALAMAN 6 — EVALUASI
+   ============================================================ */
+const pgSoal = [
+  { teks:"Manakah yang merupakan pengertian dari \"Dekomposisi\" dalam berpikir komputasional?",
+    opsi:["Memecah masalah besar menjadi bagian-bagian kecil yang lebih mudah diselesaikan","Menulis kode program dengan bahasa pemrograman","Menggambar diagram alur sistem","Menghubungkan komputer ke internet"], jawaban:0 },
+  { teks:"Ketika kita mencari kesamaan ciri dari beberapa masalah agar dapat diselesaikan lebih cepat, kita sedang menerapkan...",
+    opsi:["Algoritma","Pengenalan Pola","Dekomposisi","Debugging"], jawaban:1 },
+  { teks:"Susunan langkah-langkah logis dan berurutan untuk menyelesaikan suatu masalah disebut...",
+    opsi:["Abstraksi","Pola","Algoritma","Variabel"], jawaban:2 }
+];
+const tfSoal = [
+  { teks:"Berpikir komputasional hanya dapat digunakan oleh programmer profesional.", jawaban:false },
+  { teks:"Dekomposisi membantu masalah besar menjadi lebih mudah dipahami dan diselesaikan.", jawaban:true },
+  { teks:"Algoritma yang baik harus memiliki langkah yang jelas dan berurutan.", jawaban:true }
+];
+const matchPairs = [
+  { term:"Dekomposisi", def:"Memecah masalah rumit menjadi bagian-bagian kecil" },
+  { term:"Pengenalan Pola", def:"Menemukan kesamaan atau pola dari beberapa masalah" },
+  { term:"Abstraksi", def:"Fokus pada informasi penting, mengabaikan detail tidak perlu" },
+  { term:"Algoritma", def:"Langkah-langkah logis untuk menyelesaikan masalah" }
+];
+
+let evalInit = false;
+let pgIndex = 0, pgScore = 0, pgAnswered = false;
+let tfIndex = 0, tfScore = 0, tfAnswered = false;
+let matchScore = 0, matchSelectedLeft = null, matchDoneCount = 0;
+
+function initEvaluasi(){
+  if(evalInit) return;
+  evalInit = true;
+  pgIndex=0; pgScore=0;
+  tfIndex=0; tfScore=0;
+  matchScore=0; matchDoneCount=0;
+  showRound('a');
+  renderPG();
+  renderTF();
+  renderMatch();
+}
+function showRound(letter){
+  document.querySelectorAll('.eval-round').forEach(r=>r.classList.remove('active'));
+  document.getElementById('round-'+letter).classList.add('active');
+  const titles = {a:'Evaluasi — Babak A: Pilihan Ganda', b:'Evaluasi — Babak B: Menjodohkan', c:'Evaluasi — Babak C: Benar/Salah', d:'Evaluasi — Rekap Nilai'};
+  document.getElementById('eval-title-pill').textContent = titles[letter];
+}
+
+function renderPG(){
+  const s = pgSoal[pgIndex];
+  document.getElementById('pg-no').textContent = `Soal ${pgIndex+1} dari ${pgSoal.length}`;
+  document.getElementById('pg-teks').textContent = s.teks;
+  const opsiWrap = document.getElementById('pg-opsi');
+  opsiWrap.innerHTML = '';
+  pgAnswered = false;
+  s.opsi.forEach((op,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'opsi-btn no-select';
+    btn.textContent = op;
+    btn.onclick = ()=>answerPG(i, btn);
+    opsiWrap.appendChild(btn);
+  });
+  const prog = document.getElementById('pg-progress');
+  prog.innerHTML = pgSoal.map((_,i)=>`<span class="dot ${i===pgIndex?'on':''}"></span>`).join('');
+}
+function answerPG(i, btn){
+  if(pgAnswered) return;
+  pgAnswered = true;
+  const s = pgSoal[pgIndex];
+  const correct = i===s.jawaban;
+  if(correct){ pgScore += 10; playBenar(); btn.classList.add('benar'); }
+  else{ playSalah(); btn.classList.add('salah'); document.getElementById('pg-opsi').children[s.jawaban].classList.add('benar'); }
+  setTimeout(()=>{
+    if(pgIndex < pgSoal.length-1){ pgIndex++; renderPG(); }
+    else{ showRound('b'); }
+  }, 900);
+}
+
+function renderTF(){
+  const s = tfSoal[tfIndex];
+  document.getElementById('tf-no').textContent = `Pernyataan ${tfIndex+1} dari ${tfSoal.length}`;
+  document.getElementById('tf-teks').textContent = s.teks;
+  tfAnswered = false;
+  document.querySelectorAll('.tf-btn').forEach(b=>{ b.style.opacity='1'; });
+  const prog = document.getElementById('tf-progress');
+  prog.innerHTML = tfSoal.map((_,i)=>`<span class="dot ${i===tfIndex?'on':''}"></span>`).join('');
+}
+function answerTF(val){
+  if(tfAnswered) return;
+  tfAnswered = true;
+  const s = tfSoal[tfIndex];
+  const correct = val===s.jawaban;
+  if(correct){ tfScore += 10; playBenar(); }
+  else{ playSalah(); }
+  setTimeout(()=>{
+    if(tfIndex < tfSoal.length-1){ tfIndex++; renderTF(); }
+    else{ finishEvaluasi(); }
+  }, 700);
+}
+
+function renderMatch(){
+  const leftCol = document.getElementById('match-left');
+  const rightCol = document.getElementById('match-right');
+  leftCol.innerHTML = ''; rightCol.innerHTML = '';
+  document.getElementById('match-svg').innerHTML = '';
+  matchSelectedLeft = null;
+
+  const rightShuffled = [...matchPairs].sort(()=>Math.random()-0.5);
+
+  matchPairs.forEach((p,i)=>{
+    const el = document.createElement('button');
+    el.className = 'match-item no-select';
+    el.textContent = p.term;
+    el.dataset.term = p.term;
+    el.onclick = ()=>selectLeft(el, p.term);
+    leftCol.appendChild(el);
+  });
+  rightShuffled.forEach((p,i)=>{
+    const el = document.createElement('button');
+    el.className = 'match-item no-select';
+    el.textContent = p.def;
+    el.dataset.term = p.term;
+    el.onclick = ()=>selectRight(el, p.term);
+    rightCol.appendChild(el);
+  });
+}
+function selectLeft(el, term){
+  if(el.classList.contains('done')) return;
+  playClick();
+  document.querySelectorAll('#match-left .match-item').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  matchSelectedLeft = { el, term };
+}
+function selectRight(el, term){
+  if(el.classList.contains('done') || !matchSelectedLeft) return;
+  const leftEl = matchSelectedLeft.el;
+  const leftTerm = matchSelectedLeft.term;
+  if(leftTerm === term){
+    playBenar();
+    leftEl.classList.remove('selected'); leftEl.classList.add('done');
+    el.classList.add('done');
+    drawMatchLine(leftEl, el);
+    matchScore += 10;
+    matchDoneCount++;
+    matchSelectedLeft = null;
+    if(matchDoneCount === matchPairs.length){
+      setTimeout(()=> showRound('c'), 700);
+    }
+  } else {
+    playSalah();
+    leftEl.classList.remove('selected');
+    matchSelectedLeft = null;
+  }
+}
+function drawMatchLine(leftEl, rightEl){
+  const svg = document.getElementById('match-svg');
+  const svgRect = svg.getBoundingClientRect();
+  const lr = leftEl.getBoundingClientRect();
+  const rr = rightEl.getBoundingClientRect();
+  const x1 = lr.right - svgRect.left, y1 = lr.top + lr.height/2 - svgRect.top;
+  const x2 = rr.left - svgRect.left, y2 = rr.top + rr.height/2 - svgRect.top;
+  const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+  line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+  line.setAttribute('stroke','#16a34a');
+  line.setAttribute('stroke-width','4');
+  line.setAttribute('stroke-linecap','round');
+  line.setAttribute('stroke-dasharray','300');
+  line.setAttribute('stroke-dashoffset','300');
+  svg.appendChild(line);
+  line.animate([{strokeDashoffset:300},{strokeDashoffset:0}],{duration:400, fill:'forwards'});
+}
+
+function finishEvaluasi(){
+  showRound('d');
+  const total = pgScore + matchScore + tfScore;
+  document.getElementById('skor-a').textContent = pgScore;
+  document.getElementById('skor-b').textContent = matchScore;
+  document.getElementById('skor-c').textContent = tfScore;
+  animateCounter(document.getElementById('skor-total'), total);
+}
+function animateCounter(el, target){
+  let cur = 0;
+  const step = Math.max(1, Math.round(target/30));
+  const iv = setInterval(()=>{
+    cur += step;
+    if(cur >= target){ cur = target; clearInterval(iv); }
+    el.textContent = cur;
+  }, 25);
+}
+function resetEvaluasi(){
+  playClick();
+  evalInit = false;
+  initEvaluasi();
+}
+
+/* init pertama kali */
+document.addEventListener('click', ensureAudio, {once:true});
+</script>
+</body>
+</html>
